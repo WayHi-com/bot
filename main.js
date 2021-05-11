@@ -16,12 +16,20 @@ client.on('message', message => {
 });
 
 
+/*
+client.on('messageReactionAdd', (reaction, user) => {
+	if (reaction.message.channel.id != createchannel.id) return;
+
+	createChannel(reaction.emoji.name, reaction.message.guild)
+});
+*/
+
 client.on("ready", function(){
 	let createchannel = client.channels.cache.find(
 		channel => channel.name.toLowerCase() === CREATE_CHANNEL_NAME
 	)
-	console.log(createchannel)
 
+	
 	createchannel.messages.fetch({ limit: 100 }).then(messages => {
 		console.log(`Received ${messages.size} messages`);
 		//Iterate through the messages here with the variable "messages".
@@ -30,21 +38,20 @@ client.on("ready", function(){
 				return true
 				//return ['👍', '👎'].includes(reaction.emoji.name) && user.id === message.author.id;
 			};
-		
-			message.awaitReactions(filter, { max: 1, time: 60000, errors: ['time'] })
-				.then(collected => {
-					const reaction = collected.first();
-					
-					//message.reply(reaction.emoji.name)
-					createChannel(reaction.emoji.name, message.guild)
-				})
-				.catch(collected => {
-					
-				});
+
+			let collector = message.createReactionCollector(filter, { time: 86400 * 9999 });
+			collector.on('collect', (reaction, collector) => {
+				console.log('got a reaction');
+				message.reply(reaction.emoji.name)
+				createChannel(reaction.emoji.name, reaction.message.guild)
+			});
+			collector.on('end', collected => {
+				console.log(`collected ${collected.size} reactions`);
+			});
+			
 
 		})
 	  })
-
 	  
 })
 
