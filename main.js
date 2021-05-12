@@ -4,6 +4,7 @@ const client = new Discord.Client();
 const CREATE_CHANNEL_NAME = 'create-channel'
 
 clickedUsers = []
+createdChannels = []
 
 client.on('ready', () => {
 	console.log(`Logged in as ${client.user.tag}!`);
@@ -89,7 +90,7 @@ client.on("ready", function(){
 						}
 					],
 				}).then(function(channel) {
-					console.log(guild.member(user))
+					createdChannels.push(channel)
 					guild.member(user).voice.setChannel(channel)
 				}).catch(error => {throw error})
 			});
@@ -99,7 +100,16 @@ client.on("ready", function(){
 			
 
 		})
-	  })
+	})
+
+	//delete empty voice channels 
+	setInterval(function() {
+		createdChannels.forEach(function(channel, index) {
+			if (channel.members.size == 0) {
+				channel.delete()
+			}
+		})
+	}, 10000)
 })
 
 client.login('ODQxNTUxNDkzMTI3MzQwMDUy.YJoZ5w.FIEJaHFQonI04lf0f1beNd8zSKY');
