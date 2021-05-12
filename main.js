@@ -52,22 +52,6 @@ client.on("ready", function(){
 
 				savedUser = clickedUsers.find(x => x.id == user.id)
 				
-				alreadyCreated = false
-				createdChannels.forEach(function(channel, index) {
-					if (channel._userCreated == user) {
-						createchannel.send(`${user.toString()}, you already created a lobby`)
-						//await reaction.message.reply(`${user.toString()}, you must be in lobby voice channel`)
-							.then(msg => {
-								setTimeout(function() {
-									msg.delete()
-								}, 3000)
-							})
-							.catch(error => { throw error});
-						alreadyCreated = true
-					}
-				})
-				if (alreadyCreated) return
-				
 				clickedAgo = savedUser ? (Date.now() - savedUser.lastClicked) / 1000 : 25
 				if(clickedAgo < 25) {					
 					await createchannel.send(`${user.toString()}, can create again only in ${Math.round(25 - clickedAgo)} seconds`)
@@ -90,6 +74,21 @@ client.on("ready", function(){
 						.catch(error => { throw error});
 					return
 				}
+				alreadyCreated = false
+				createdChannels.forEach(function(channel, index) {
+					if (channel._userCreated == user) {
+						createchannel.send(`${user.toString()}, you already created a lobby`)
+						//await reaction.message.reply(`${user.toString()}, you must be in lobby voice channel`)
+							.then(msg => {
+								setTimeout(function() {
+									msg.delete()
+								}, 3000)
+							})
+							.catch(error => { throw error});
+						alreadyCreated = true
+					}
+				})
+				if (alreadyCreated) return
 				
 				user.lastClicked = Date.now()
 				clickedUsers.push(user)
@@ -116,7 +115,12 @@ client.on("ready", function(){
 				}).then(function(channel) {			
 					channel._userCreated = user	
 					createdChannels.push(channel)
-					guild.member(user).voice.setChannel(channel)
+
+					createchannel.members.forEach(function(member, index) {
+						member.voice.setChannel(channel)
+					})
+
+					//guild.member(user).voice.setChannel(channel)
 
 					//channel.setParent(category)
 				}).catch(error => {throw error})
