@@ -2,6 +2,7 @@ const Discord = require('discord.js');
 const client = new Discord.Client();
 
 const CREATE_CHANNEL_NAME = 'create-channel'
+const LOBBY_CATEGORY_NAME = 'lobbies'
 
 clickedUsers = []
 createdChannels = []
@@ -56,7 +57,7 @@ client.on("ready", function(){
 						.then(msg => {
 							setTimeout(function() {
 								msg.delete()
-							}, 5000)
+							}, 3000)
 						})
 						.catch(error => { throw error});
 					return
@@ -67,7 +68,7 @@ client.on("ready", function(){
 						.then(msg => {
 							setTimeout(function() {
 								msg.delete()
-							}, 5000)
+							}, 3000)
 						})
 						.catch(error => { throw error});
 					return
@@ -79,9 +80,14 @@ client.on("ready", function(){
 	
 				//message.reply(reaction.emoji.name)
 				//createChannel(reaction.emoji.name, reaction.message.guild)
-				
+				category = client.channels.cache.filter(x => x.name == LOBBY_CATEGORY_NAME).first()
+				//channel.setParent(category.id);
+								
+				console.log(category)
 				guild.channels.create(channelName, {
 					type: "voice", //This create a text channel, you can make a voice one too, by changing "text" to "voice"
+					parent: category,
+					parentID: category.id,
 					permissionOverwrites: [
 						{
 							id: guild.roles.everyone, //To make it be seen by a certain role, user an ID instead
@@ -89,9 +95,11 @@ client.on("ready", function(){
 							deny: ['VIEW_CHANNEL', 'SEND_MESSAGES', 'READ_MESSAGE_HISTORY'] //Deny permissions
 						}
 					],
-				}).then(function(channel) {
+				}).then(function(channel) {				
 					createdChannels.push(channel)
 					guild.member(user).voice.setChannel(channel)
+
+					//channel.setParent(category)
 				}).catch(error => {throw error})
 			});
 			collector.on('end', collected => {
@@ -104,11 +112,13 @@ client.on("ready", function(){
 
 	//delete empty voice channels 
 	setInterval(function() {
-		createdChannels.forEach(function(channel, index) {
+		createdChannels.forEach(function(channel, index, object) {
 			if (channel.members.size == 0) {
 				channel.delete()
+				object.splice(index, 1)
 			}
 		})
+		console.log(createdChannels.length)
 	}, 10000)
 })
 
