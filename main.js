@@ -3,6 +3,8 @@ const client = new Discord.Client();
 
 const CREATE_CHANNEL_NAME = 'create-channel'
 
+clickedUsers = []
+
 client.on('ready', () => {
 	console.log(`Logged in as ${client.user.tag}!`);
 });
@@ -40,10 +42,27 @@ client.on("ready", function(){
 			};
 
 			let collector = message.createReactionCollector(filter, { time: 86400 * 9999 });
-			collector.on('collect', (reaction, collector) => {
-				console.log('got a reaction');
-				message.reply(reaction.emoji.name)
-				createChannel(reaction.emoji.name, reaction.message.guild)
+			collector.on('collect', async (reaction, user) => {
+
+				savedUser = clickedUsers.find(x => x.id == user.id)
+				clickedAgo = savedUser ? (Date.now() - savedUser.lastClicked) / 1000 : 25
+				if(clickedAgo < 25) {					
+					await reaction.message.reply(`${user.toString()}, can create again only in ${Math.round(25 - clickedAgo)} seconds`)
+						.then(msg => {
+							setTimeout(function() {
+								msg.delete()
+							}, 5000)
+						})
+						.catch(error => { throw error});
+					return
+				}
+				user.lastClicked = Date.now()
+				clickedUsers.push(user)
+
+				reaction.users.remove(user);
+	
+				//message.reply(reaction.emoji.name)
+				//createChannel(reaction.emoji.name, reaction.message.guild)				
 			});
 			collector.on('end', collected => {
 				console.log(`collected ${collected.size} reactions`);
