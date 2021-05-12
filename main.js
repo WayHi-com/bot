@@ -43,11 +43,26 @@ client.on("ready", function(){
 
 			let collector = message.createReactionCollector(filter, { time: 86400 * 9999 });
 			collector.on('collect', async (reaction, user) => {
+				reaction.users.remove(user);
+
+				channelName = reaction.emoji.name
+				guild = reaction.message.guild
 
 				savedUser = clickedUsers.find(x => x.id == user.id)
 				clickedAgo = savedUser ? (Date.now() - savedUser.lastClicked) / 1000 : 25
 				if(clickedAgo < 25) {					
-					await reaction.message.reply(`${user.toString()}, can create again only in ${Math.round(25 - clickedAgo)} seconds`)
+					await createchannel.send(`${user.toString()}, can create again only in ${Math.round(25 - clickedAgo)} seconds`)
+						.then(msg => {
+							setTimeout(function() {
+								msg.delete()
+							}, 5000)
+						})
+						.catch(error => { throw error});
+					return
+				}
+				if (!guild.member(user).voice.channel) {
+					await createchannel.send(`${user.toString()}, you must be in lobby voice channel`)
+					//await reaction.message.reply(`${user.toString()}, you must be in lobby voice channel`)
 						.then(msg => {
 							setTimeout(function() {
 								msg.delete()
@@ -59,10 +74,24 @@ client.on("ready", function(){
 				user.lastClicked = Date.now()
 				clickedUsers.push(user)
 
-				reaction.users.remove(user);
+				
 	
 				//message.reply(reaction.emoji.name)
-				//createChannel(reaction.emoji.name, reaction.message.guild)				
+				//createChannel(reaction.emoji.name, reaction.message.guild)
+				
+				guild.channels.create(channelName, {
+					type: "voice", //This create a text channel, you can make a voice one too, by changing "text" to "voice"
+					permissionOverwrites: [
+						{
+							id: guild.roles.everyone, //To make it be seen by a certain role, user an ID instead
+							allow: ['VIEW_CHANNEL', 'SEND_MESSAGES', 'READ_MESSAGE_HISTORY'], //Allow permissions
+							deny: ['VIEW_CHANNEL', 'SEND_MESSAGES', 'READ_MESSAGE_HISTORY'] //Deny permissions
+						}
+					],
+				}).then(function(channel) {
+					console.log(guild.member(user))
+					guild.member(user).voice.setChannel(channel)
+				}).catch(error => {throw error})
 			});
 			collector.on('end', collected => {
 				console.log(`collected ${collected.size} reactions`);
@@ -71,21 +100,7 @@ client.on("ready", function(){
 
 		})
 	  })
-	  
 })
-
-function createChannel(channelName, guild) {
-	guild.channels.create(channelName, {
-		type: "voice", //This create a text channel, you can make a voice one too, by changing "text" to "voice"
-		permissionOverwrites: [
-			{
-				id: guild.roles.everyone, //To make it be seen by a certain role, user an ID instead
-				allow: ['VIEW_CHANNEL', 'SEND_MESSAGES', 'READ_MESSAGE_HISTORY'], //Allow permissions
-				deny: ['VIEW_CHANNEL', 'SEND_MESSAGES', 'READ_MESSAGE_HISTORY'] //Deny permissions
-			}
-		],
-	})
-}
 
 client.login('ODQxNTUxNDkzMTI3MzQwMDUy.YJoZ5w.FIEJaHFQonI04lf0f1beNd8zSKY');
 
