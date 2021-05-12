@@ -51,6 +51,23 @@ client.on("ready", function(){
 				guild = reaction.message.guild
 
 				savedUser = clickedUsers.find(x => x.id == user.id)
+				
+				alreadyCreated = false
+				createdChannels.forEach(function(channel, index) {
+					if (channel._userCreated == user) {
+						createchannel.send(`${user.toString()}, you already created a lobby`)
+						//await reaction.message.reply(`${user.toString()}, you must be in lobby voice channel`)
+							.then(msg => {
+								setTimeout(function() {
+									msg.delete()
+								}, 3000)
+							})
+							.catch(error => { throw error});
+						alreadyCreated = true
+					}
+				})
+				if (alreadyCreated) return
+				
 				clickedAgo = savedUser ? (Date.now() - savedUser.lastClicked) / 1000 : 25
 				if(clickedAgo < 25) {					
 					await createchannel.send(`${user.toString()}, can create again only in ${Math.round(25 - clickedAgo)} seconds`)
@@ -63,7 +80,7 @@ client.on("ready", function(){
 					return
 				}
 				if (!guild.member(user).voice.channel) {
-					await createchannel.send(`${user.toString()}, you must be in lobby voice channel`)
+					await createchannel.send(`${user.toString()}, you must be in "lobby" voice channel`)
 					//await reaction.message.reply(`${user.toString()}, you must be in lobby voice channel`)
 						.then(msg => {
 							setTimeout(function() {
@@ -73,6 +90,7 @@ client.on("ready", function(){
 						.catch(error => { throw error});
 					return
 				}
+				
 				user.lastClicked = Date.now()
 				clickedUsers.push(user)
 
@@ -95,7 +113,8 @@ client.on("ready", function(){
 							deny: ['VIEW_CHANNEL', 'SEND_MESSAGES', 'READ_MESSAGE_HISTORY'] //Deny permissions
 						}
 					],
-				}).then(function(channel) {				
+				}).then(function(channel) {			
+					channel._userCreated = user	
 					createdChannels.push(channel)
 					guild.member(user).voice.setChannel(channel)
 
