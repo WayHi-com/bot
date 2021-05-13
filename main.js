@@ -88,8 +88,6 @@ client.on("ready", function(){
 						.catch(error => { throw error});
 					return
 				}
-				console.log(lobbychannel.name)
-				console.log(guild.member(user).voice.channel.name)
 				if (!guild.member(user).voice.channel || guild.member(user).voice.channel.name != lobbychannel.name) {
 					await createchannel.send(`${user.toString()}, you must be in "${LOBBY_CHANNEL_NAME}" voice channel`)
 					//await reaction.message.reply(`${user.toString()}, you must be in lobby voice channel`)
