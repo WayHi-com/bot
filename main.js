@@ -1,8 +1,9 @@
 const Discord = require('discord.js');
 const client = new Discord.Client();
 
-const CREATE_CHANNEL_NAME = 'create-channel'
-const LOBBY_CATEGORY_NAME = 'lobbies'
+const CREATE_CHANNEL_NAME = '🎮-start-here'
+const LOBBY_CHANNEL_NAME = '🎮 | Create a lobby'
+const LOBBY_CATEGORY_NAME = 'Game Lobbies'
 
 clickedUsers = []
 createdChannels = []
@@ -28,9 +29,33 @@ client.on('messageReactionAdd', (reaction, user) => {
 });
 */
 
+/*
+client.on('voiceStateUpdate', (oldMember, newMember) => {
+	let lobbychannel = client.channels.cache.find(
+		channel => channel.name.toLowerCase() === LOBBY_CHANNEL_NAME
+	)
+
+	console.log(newMember.voiceStates)	
+	const newUserChannel = newMember.voice.channelID
+  	const oldUserChannel = oldMember.voice.channelID
+	//let newUserChannel = newMember ? newMember.voice.channel : null
+	//let oldUserChannel = oldMember ? oldMember.voice.channel : null
+	
+  
+	if (oldUserChannel === undefined && newUserChannel !== undefined) {  
+		console.log('User Joins a voice channel')
+	} else if(newUserChannel === undefined && newUserChannel == lobbychannel) {  
+		console.log('User leaves a voice channel')  
+	}
+})
+*/
+
 client.on("ready", function(){
 	let createchannel = client.channels.cache.find(
-		channel => channel.name.toLowerCase() === CREATE_CHANNEL_NAME
+		channel => channel.name === CREATE_CHANNEL_NAME
+	)
+	let lobbychannel = client.channels.cache.find(
+		channel => channel.name === LOBBY_CHANNEL_NAME
 	)
 
 	
@@ -58,18 +83,20 @@ client.on("ready", function(){
 						.then(msg => {
 							setTimeout(function() {
 								msg.delete()
-							}, 3000)
+							}, 10000)
 						})
 						.catch(error => { throw error});
 					return
 				}
-				if (!guild.member(user).voice.channel) {
-					await createchannel.send(`${user.toString()}, you must be in "lobby" voice channel`)
+				console.log(lobbychannel.name)
+				console.log(guild.member(user).voice.channel.name)
+				if (!guild.member(user).voice.channel || guild.member(user).voice.channel.name != lobbychannel.name) {
+					await createchannel.send(`${user.toString()}, you must be in "${LOBBY_CHANNEL_NAME}" voice channel`)
 					//await reaction.message.reply(`${user.toString()}, you must be in lobby voice channel`)
 						.then(msg => {
 							setTimeout(function() {
 								msg.delete()
-							}, 3000)
+							}, 10000)
 						})
 						.catch(error => { throw error});
 					return
@@ -82,13 +109,15 @@ client.on("ready", function(){
 							.then(msg => {
 								setTimeout(function() {
 									msg.delete()
-								}, 3000)
+								}, 10000)
 							})
 							.catch(error => { throw error});
 						alreadyCreated = true
 					}
 				})
 				if (alreadyCreated) return
+				//console.log(lobbychannel.guild.members.cache.first().id == user.id)
+
 				
 				user.lastClicked = Date.now()
 				clickedUsers.push(user)
@@ -100,7 +129,7 @@ client.on("ready", function(){
 				category = client.channels.cache.filter(x => x.name == LOBBY_CATEGORY_NAME).first()
 				//channel.setParent(category.id);
 								
-				console.log(category)
+				
 				guild.channels.create(channelName, {
 					type: "voice", //This create a text channel, you can make a voice one too, by changing "text" to "voice"
 					parent: category,
@@ -116,7 +145,7 @@ client.on("ready", function(){
 					channel._userCreated = user	
 					createdChannels.push(channel)
 
-					createchannel.members.forEach(function(member, index) {
+					lobbychannel.members.forEach(function(member, index) {
 						member.voice.setChannel(channel)
 					})
 
