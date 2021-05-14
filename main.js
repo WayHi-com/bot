@@ -10,6 +10,7 @@ fs = require('fs')
 
 clickedUsers = []
 createdChannels = []
+collectors = []
 
 //emodziLimits = {}
 emodziLimits = require('./emodzilimits.json');
@@ -39,16 +40,17 @@ client.on('message', message => {
 		if (!limit) {return}
 
 		emodziLimits[args[0]] = limit
-		message.channel.send(`Limit for reacton '${args[0]}' is set for ${limit}`)
-		.then(msg => {
-			setTimeout(function() {
-				msg.delete()
-			}, 10000)
-		})
-		.catch(error => { throw error});
+		sendMessage(message.channel, `Limit for reacton '${args[0]}' is set for ${limit}`)
 		console.log(emodziLimits)
 
 		fs.writeFileSync('emodzilimits.json', JSON.stringify(emodziLimits));
+	} else if (command === 'start') {
+		sendMessage(message.channel, 'Starting')
+		unbindCollectors()
+		bindCollectors()
+	} else if (command === 'stop') {
+		sendMessage(message.channel, 'Stopping')
+		unbindCollectors()
 	}
 
 	setTimeout(function() {
@@ -56,6 +58,16 @@ client.on('message', message => {
 	}, 1000)
 });
 
+
+function sendMessage(channel, message) {
+	channel.send(message)
+		.then(msg => {
+			setTimeout(function() {
+				msg.delete()
+			}, 10000)
+		})
+		.catch(error => { throw error});
+}
 
 /*
 client.on('messageReactionAdd', (reaction, user) => {
@@ -86,7 +98,14 @@ client.on('voiceStateUpdate', (oldMember, newMember) => {
 })
 */
 
-client.on("ready", function(){
+function unbindCollectors() {
+	collectors.forEach(function(collector, index) {
+		collector.stop()
+	})
+	collectors = []
+}
+
+function bindCollectors() {
 	let createchannel = client.channels.cache.find(
 		channel => channel.name === CREATE_CHANNEL_NAME
 	)
@@ -94,7 +113,7 @@ client.on("ready", function(){
 		channel => channel.name === LOBBY_CHANNEL_NAME
 	)
 
-	
+	collectors = []
 	createchannel.messages.fetch({ limit: 100 }).then(messages => {
 		console.log(`Received ${messages.size} messages`);
 		//Iterate through the messages here with the variable "messages".
@@ -199,10 +218,14 @@ client.on("ready", function(){
 			collector.on('end', collected => {
 				console.log(`collected ${collected.size} reactions`);
 			});
-			
+			collectors.push(collector)
 
 		})
 	})
+}
+
+function clientonready() {
+	bindCollectors()
 
 	//delete empty voice channels 
 	setInterval(function() {
@@ -214,10 +237,10 @@ client.on("ready", function(){
 		})
 		console.log(createdChannels.length)
 	}, 10000)
-})
+}
+client.on("ready", clientonready)
 
-//client.login('ODQxNTUxNDkzMTI3MzQwMDUy.YJoZ5w.FIEJaHFQonI04lf0f1beNd8zSKY');
-
-
+token = 'ODQxNTUxNDkzMTI3MzQwMDUy.YJoZ5w.FIEJaHFQonI04lf0f1beNd8zSKY'
 //bot test
-client.login('ODQyNjI2NzQ4MzY1MTQ0MDk0.YJ4DUA.-7-v_Re2KNfqBZqgssah2OOdT8g');
+token = 'ODQyNjI2NzQ4MzY1MTQ0MDk0.YJ4DUA.-7-v_Re2KNfqBZqgssah2OOdT8g' //bot test
+client.login(token);
