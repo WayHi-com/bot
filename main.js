@@ -5,11 +5,14 @@ const CREATE_CHANNEL_NAME = '🎮-start-here'
 const LOBBY_CHANNEL_NAME = '🎮 | Create a lobby'
 const LOBBY_CATEGORY_NAME = 'Game Lobbies'
 
+fs = require('fs')
+
 
 clickedUsers = []
 createdChannels = []
 
-emodziLimits = {}
+//emodziLimits = {}
+emodziLimits = require('./emodzilimits.json');
 
 client.on('ready', () => {
 	console.log(`Logged in as ${client.user.tag}!`);
@@ -44,6 +47,8 @@ client.on('message', message => {
 		})
 		.catch(error => { throw error});
 		console.log(emodziLimits)
+
+		fs.writeFileSync('emodzilimits.json', JSON.stringify(emodziLimits));
 	}
 
 	setTimeout(function() {
