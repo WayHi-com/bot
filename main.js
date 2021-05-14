@@ -5,19 +5,50 @@ const CREATE_CHANNEL_NAME = '🎮-start-here'
 const LOBBY_CHANNEL_NAME = '🎮 | Create a lobby'
 const LOBBY_CATEGORY_NAME = 'Game Lobbies'
 
+
 clickedUsers = []
 createdChannels = []
+
+emodziLimits = {}
 
 client.on('ready', () => {
 	console.log(`Logged in as ${client.user.tag}!`);
 });
 
+prefix = '/cc'
 client.on('message', message => {
-	if (message.content === 'ping') {
-		message.reply('pong');
-		channelName = 'test'		
+	if (!message.content.startsWith(prefix) || message.author.bot) return;
+	if (!message.member.hasPermission('ADMINISTRATOR')) {
+		console.log('Not admin')
+		return
 	}
-	//message.react('👍').then(() => message.react('👎')); 
+
+	//message.delete(1000)
+
+	const args = message.content.slice(prefix.length).trim().split(/ +/);
+	const command = args.shift().toLowerCase();
+
+	console.log(command)
+	console.log(args)
+	console.log(args.length)
+	if (command === 'setemodzilimit' && args.length == 2) {
+		limit = parseInt(args[1])
+		if (!limit) {return}
+
+		emodziLimits[args[0]] = limit
+		message.channel.send(`Limit for reacton '${args[0]}' is set for ${limit}`)
+		.then(msg => {
+			setTimeout(function() {
+				msg.delete()
+			}, 10000)
+		})
+		.catch(error => { throw error});
+		console.log(emodziLimits)
+	}
+
+	setTimeout(function() {
+		message.delete()		
+	}, 1000)
 });
 
 
@@ -140,7 +171,13 @@ client.on("ready", function(){
 						}
 					],
 				}).then(function(channel) {		
-					channel.setUserLimit(5)
+					console.log(channelName)
+					if(channel.name in emodziLimits) {
+						limit = emodziLimits[channelName]
+					} else {
+						limit = 5
+					}
+					channel.setUserLimit(limit)
 					
 					channel._userCreated = user	
 					createdChannels.push(channel)
@@ -174,6 +211,8 @@ client.on("ready", function(){
 	}, 10000)
 })
 
-client.login('ODQxNTUxNDkzMTI3MzQwMDUy.YJoZ5w.FIEJaHFQonI04lf0f1beNd8zSKY');
+//client.login('ODQxNTUxNDkzMTI3MzQwMDUy.YJoZ5w.FIEJaHFQonI04lf0f1beNd8zSKY');
 
 
+//bot test
+client.login('ODQyNjI2NzQ4MzY1MTQ0MDk0.YJ4DUA.-7-v_Re2KNfqBZqgssah2OOdT8g');
