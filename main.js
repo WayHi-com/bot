@@ -139,7 +139,9 @@ client.on("ready", function(){
 							deny: ['VIEW_CHANNEL', 'SEND_MESSAGES', 'READ_MESSAGE_HISTORY'] //Deny permissions
 						}
 					],
-				}).then(function(channel) {			
+				}).then(function(channel) {		
+					channel.setUserLimit(5)
+					
 					channel._userCreated = user	
 					createdChannels.push(channel)
 
