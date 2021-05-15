@@ -240,5 +240,5 @@ function clientonready() {
 }
 client.on("ready", clientonready)
 
-token = 'ODQzMDkzNzg2NTEwMzYwNjE3.YJ-2Rg.MtNcjlZ8qyBDj_b2Rvp-hpjLLeA'
+token = 'ODQzMDkzNzg2NTEwMzYwNjE3.YJ-2Rg.YJDk7lQcHzkRBPXgBIyvOi2oH_M'
 client.login(token);
