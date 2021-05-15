@@ -240,7 +240,5 @@ function clientonready() {
 }
 client.on("ready", clientonready)
 
-token = 'ODQxNTUxNDkzMTI3MzQwMDUy.YJoZ5w.FIEJaHFQonI04lf0f1beNd8zSKY'
-//bot test
-token = 'ODQyNjI2NzQ4MzY1MTQ0MDk0.YJ4DUA.-7-v_Re2KNfqBZqgssah2OOdT8g' //bot test
+token = 'ODQzMDkzNzg2NTEwMzYwNjE3.YJ-2Rg.MtNcjlZ8qyBDj_b2Rvp-hpjLLeA'
 client.login(token);
